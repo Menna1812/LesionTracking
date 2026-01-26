@@ -1,0 +1,4 @@
+MSLesSeg_Dataset/
+__pycache__/
+*.pyc
+.~lock*
