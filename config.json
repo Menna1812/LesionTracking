@@ -1,0 +1,12 @@
+{
+  "nnunet": {
+    "dataset_name": "Dataset004_WML",
+    "trainer": "nnUNetTrainer_8000epochs__nnUNetPlans__3d_fullres",
+    "configuration": "3d_fullres"
+  },
+  "paths": {
+    "runtime_dir": "nnunet_runtime",
+    "model_dir": "FLAMeS_MODEL",
+    "output_dir": "output"
+  }
+}
