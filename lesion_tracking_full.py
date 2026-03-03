@@ -1,3 +1,4 @@
+from ast import parse
 import os
 import sys
 import glob
@@ -424,6 +425,7 @@ def filter_small_lesions(labeled_volume, min_voxels, voxel_vol):
     labeled_volume, _ = label_mask(labeled_volume > 0)
     return labeled_volume
 
+
 def run_lesion_tracking( followup_input, labeled_T1, output_dir, min_voxels=10, baseline_input = None):
     """
     Wraps all functionality to process lesion tracking for baseline and follow-up.
@@ -562,14 +564,43 @@ def run_lesion_tracking( followup_input, labeled_T1, output_dir, min_voxels=10, 
         
     return baseline_imgs, followup_imgs, baseline_tbls, followup_tbls
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Lesion Tracking Analysis")
-    parser.add_argument("baseline_input", help="Path to labeled baseline file or directory")
-    parser.add_argument("followup_input", help="Path to follow-up file or directory")
-    parser.add_argument("output_dir", help="Directory for output files")
-    parser.add_argument("--min_voxels", type=int, default=10, help="Minimum voxel count for a lesion to be included (default: 10)")
-    parser.add_argument("--baseline_input", help="Path to baseline file or directory")
-    
+    subparsers = parser.add_subparsers(dest="function", required=True)
+
+    # label_baseline command
+    parser_label = subparsers.add_parser("label_baseline")
+    parser_label.add_argument("baseline_input", help="Path to baseline file")
+    parser_label.add_argument("output_dir", help="Directory for output files")
+    parser_label.add_argument("--min_voxels", type=int, default=10)
+
+    # run_tracking command 
+    parser_track = subparsers.add_parser("run_tracking")
+    parser_track.add_argument("baseline_input_labeled", help="Path to labeled baseline file")
+    parser_track.add_argument("followup_input", help="Path to follow-up file")
+    parser_track.add_argument("output_dir", help="Directory for output files")
+    parser_track.add_argument("--min_voxels", type=int, default=10)
+
     args = parser.parse_args()
-    
-    run_lesion_tracking(labeled_T1=args.baseline_input, followup_input=args.followup_input, output_dir=args.output_dir, min_voxels=args.min_voxels, baseline_input=args.baseline_input)
+
+    if args.function == "label_baseline":
+        print("Labeling baseline input...")
+        mask_1, affine_1, header_1 = load_nifti(args.baseline_input)
+        voxel_vol_1 = np.prod(header_1.get_zooms()[:3])
+        labeled_T1, _ = label_mask(mask_1)
+        labeled_T1 = filter_small_lesions(labeled_T1, args.min_voxels, voxel_vol=voxel_vol_1)
+
+        os.makedirs(args.output_dir, exist_ok=True)
+        output_path = os.path.join(args.output_dir, "labeled_baseline.nii.gz")
+        save_nifti(labeled_T1, affine_1, header_1, output_path)
+        print(f"Saved labeled baseline to {output_path}")
+
+    elif args.function == "run_tracking":
+        print("Running lesion tracking...")
+        run_lesion_tracking(
+            labeled_T1=args.baseline_input_labeled,
+            followup_input=args.followup_input,
+            output_dir=args.output_dir,
+            min_voxels=args.min_voxels
+        )
