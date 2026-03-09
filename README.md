@@ -67,9 +67,16 @@ python registeration.py patient_T2.nii.gz patient_T1.nii.gz patient_T2_registere
 
 ## Segmentation
 
-### MS Lesion Segmentation with nnU-Net v2 and FLAMeS
+### MS Lesion Segmentation with FLAMeS
 
 Automatically segment MS lesions from FLAIR MRI images using a pretrained neural network model.
+
+Pretrained Model available at:
+https://zenodo.org/records/17955359
+
+ `Slice output example:`
+ 
+![mask](Segmentationmask.png)
 
 ### Usage
 
@@ -96,6 +103,8 @@ python run_ms_segmentation.py P1_T1_FLAIR.nii.gz lesion_mask.nii.gz
 - **Output**: Binary lesion mask (NIfTI format)
 - **Training Epochs**: 8000
 - **Cross-validation**: 5-fold
+  
+![Folders](FLAMeS.png)
 
 
 
